@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"> 
+<script type="text/javascript" src="../lib/d3.v3.min.js"></script>
+</style> 
+<style type="text/css">
+    rect.tiled {
+        stroke: #E6E6E6;
+        stroke-width: 2px;
+    }
+    text.labels {
+        font-size: 9pt;
+        font-family: sans-serif;
+        fill: #000;
+    }
+    text.map {
+        font-size: 10pt;
+        font-family: sans-serif;
+        font-weight: bold;
+    }
+    text.axis-a {
+        fill: #000;
+    }
+    text.axis-b {
+        fill: #000;
+    }
+</style>
+</head>
+<body>
+<center>
+	<h2 style="font-family:sans-serif;">Visualizing Wizarding Houses and Spells</h2>
+<center>
+	<div id="house" style="font-family:sans-serif;">House   </div>
+</center>
+</center>
+<center>
+	<div id="heatmap"></div>
+</center>
+</select>
+<script type="text/javascript">
+var data = [];
+var Gryffindor = [];
+var Hufflepuff = [];
+var Ravenclaw  = [];
+var Slytherin  = [];
+d3.csv('heatmap.csv', function(d) {
+    if(d["SpellType"] == "Charm") {
+    	d["SpellType"] = 0;
+    }
+    if(d["SpellType"] == "Conjuration") {
+    	d["SpellType"] = 1;
+    }
+    if(d["SpellType"] == "Counter Spell") {
+    	d["SpellType"] = 2;
+    }
+    if(d["SpellType"] == "Curse") {
+    	d["SpellType"] = 3;
+    }
+    if(d["SpellType"] == "Healing Spell") {
+    	d["SpellType"] = 4;
+    }
+    if(d["SpellType"] == "Hex"){
+    	d["SpellType"] = 5;
+    }
+    if(d["SpellType"] == "Jinx"){
+    	d["SpellType"] = 6;
+    }
+    if(d["SpellType"] == "Transfiguration"){
+    	d["SpellType"] = 7;
+    }
+
+    Dataset = [
+    [book = 1,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Sorcerer's Stone"])],
+    [book = 2,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Chamber of Secrets"])],
+    [book = 3,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Prisoner of Azkaban"])],
+    [book = 4,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Goblet of Fire"])],
+    [book = 5,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Order of the Phoenix"])],
+    [book = 6,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Half Blood Prince"])],
+    [book = 7,
+    house = d.House,
+    spelltype = d.SpellType,
+    value = parseInt(d["Deathly Hallows"])]
+    ];
+    return Dataset;
+}, function(error, rows) {
+    data = rows;
+    splitData(rows);
+});
+
+function splitData(my_data){
+	var houses = ["Gryffindor","Hufflepuff","Ravenclaw","Slytherin"];
+    var select = d3.select("#house")
+                    .append("select")
+                    .attr("class","select")
+                    .on("change",onchange)
+    var options = select.selectAll("option")
+                        .data(houses).enter()
+                        .append("option")
+                        .text(function (d) { return d;});
+    for (var i = 0; i < my_data.length; i++) {
+        for (var j = 0; j < 7; j++) {
+            if (my_data[i][j][1] == "Gryffindor") {
+                temp = {book: my_data[i][j][0],
+                        spelltype: my_data[i][j][2],
+                        value: my_data[i][j][3]};
+                        Gryffindor.push(temp);}
+            if (my_data[i][j][1] == "Hufflepuff") {
+                temp = {book: my_data[i][j][0],
+                        spelltype: my_data[i][j][2],
+                        value: my_data[i][j][3]};
+                        Hufflepuff.push(temp);}
+            if (my_data[i][j][1] == "Ravenclaw") {
+                temp = {book: my_data[i][j][0],
+                        spelltype: my_data[i][j][2],
+                        value: my_data[i][j][3]};
+                        Ravenclaw.push(temp);}
+            if (my_data[i][j][1] == "Slytherin"){
+                      temp = {book: my_data[i][j][0],
+                        spelltype: my_data[i][j][2],
+                        value: my_data[i][j][3]};
+                        Slytherin.push(temp);}
+        }
+    }
+    plotheat(Gryffindor);
+};
+
+function onchange() {
+    d3.select("svg").remove();
+    HouseValue = d3.select("select")
+                    .property("value")
+    if (HouseValue == "Gryffindor") {
+    	plotheat(Gryffindor);
+    }
+    if (HouseValue == "Hufflepuff") {
+    	plotheat(Hufflepuff);
+    }
+    if (HouseValue == "Ravenclaw") {
+    	plotheat(Ravenclaw);
+    }
+    if (HouseValue == "Slytherin") {
+    	plotheat(Slytherin);
+    }
+};
+
+function plotheat(data) {
+    var margin = { top: 15, right: 10, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 650 - margin.top - margin.bottom,
+        Grid_Size = Math.floor(width / 16),
+        LegendWidth = Grid_Size,
+        Bucket_Size = 9,
+        colors=['f7fbff', 'deebf7', 'c6dbef', '9ecae1', '6baed6', '4292c6', '2171b5', '08519c', '08306b']
+        book = ["Sorcerer's Stone", "Chamber of Secrets", "Prisoner of Azkaban", "Goblet of Fire", "Order of the Phoenix", "Half Blood Prince", "Deathly Hallows"],
+        spells = ["Charm","Healing Spell","Hex","Counter Spell","Jinx","Curse","Transfiguration","Conjuration"];
+    
+    var svg = d3.select("#heatmap").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left * 2.5 + "," + margin.top * 1.6 + ")");
+
+    var BookLabels = svg.selectAll(".book_label")
+                        .data(book)
+                        .enter().append("text")
+                        .text(function (d) { return d; })
+                        .attr("x", -30)
+                        .attr("y", function (d, i) {
+                        	return i * Grid_Size; 
+                        })
+                        .style("text-anchor", "end")
+                        .attr("transform", "translate(-5," + Grid_Size / 1.5 + ")")
+                        .attr("class", function (d, i) {
+                        	return ((i >= 0 && i <= 6) ? "book_label labels axis axis-a" : "book_label labels axis"); 
+                        });
+
+    var SpellsLabels = svg.selectAll(".spells_label")
+                        .data(spells)
+                        .enter()
+                        .append("text")
+                        .text(function(d) {
+                            return d;
+                        })
+                        .style("text-anchor", "middle")
+						.attr("transform", function(d, i) {
+							return "translate(" + ((i + 0.5) * Grid_Size) + "," + (Grid_Size * 7 + 25) + ")"
+						})
+						.attr("class", function(d, i) {
+							return "spells_label labels axis axis-b"
+						});
+
+    var colorScale = d3.scale.quantile()
+                            .domain([0, Bucket_Size - 1, d3.max(data, function (d) {
+                            	return d.value; 
+                            })])
+                            .range(colors);                               
+    svg.append("text")
+        .text("Spell Type")
+        .attr("class", "book_label map axis axis-a")
+        .style("text-anchor", "middle")
+        .attr("x", Grid_Size*10 + 5)
+        .attr("y", Grid_Size*8 - 20);
+    
+    svg.append("text")
+        .text("No. of Spells")
+        .attr("class", "book_label map axis axis-a")
+        .attr("x", 0)
+        .attr("y", height - 30);
+    
+    svg.append("text")
+        .text("Book")
+        .attr("class", "book_label map axis axis-a")
+        .style("text-anchor", "end")
+        .attr("x", -Grid_Size)
+        .attr("y", -10);
+    
+    var tiles = svg.selectAll(".spells")
+                    .data(data, function(d) {
+                    	return d.book + ":" + d.spelltype;
+                    });
+        
+        tiles.append("title");
+        
+        tiles.enter().append("rect")
+                    .attr("x", function(d){
+                    	return (d.spelltype) * Grid_Size;
+                    })
+                    .attr("y", function(d) {
+                    	return (d.book - 1) * Grid_Size;
+                    })
+                    .attr("rx", 4)
+                    .attr("ry", 4)
+                    .attr("class", "spells tiled")
+                    .attr("width", 0.95 * Grid_Size)
+                    .attr("height", 0.95 * Grid_Size)
+                    .style("fill", colors[0]);
+        
+        tiles.transition().duration(1000)
+                    .style("fill", function(d) {
+                    	return colorScale(d.value);
+                    });
+        
+        tiles.select("title").text(function(d) {
+        	return d.value; 
+        });
+        
+        tiles.exit().remove();
+
+    var legend = svg.selectAll(".legend")
+                    .data([0].concat(colorScale.quantiles()), function(d) {
+                    	return d; 
+                    });
+        
+        legend.enter().append("g")
+                .attr("class", "legend");
+        
+        legend.append("rect")
+                .attr("x", function(d, i) {
+                    return LegendWidth * i; 
+                })
+                .attr("y", height)
+                .attr("width", LegendWidth)
+                .attr("height", Grid_Size / 2 + 2)
+                .style("fill", function(d, i) {
+                	return colors[i]; 
+                });
+        
+        legend.append("text")
+                .attr("class", "labels")
+                .text(function(d) {
+                	return Math.round(d);
+                })
+                .attr("x", function(d, i) {
+                	return LegendWidth * i;
+                })
+                .attr("y", height - 5);
+        
+        legend.exit().remove();
+};
+</script>
+</body>
+</html>

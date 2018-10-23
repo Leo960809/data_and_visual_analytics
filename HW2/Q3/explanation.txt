@@ -1,0 +1,6 @@
+a.2.
+It is better to separate the classes with combination between Budget and IMDb Rating because the data points are more identifiable and easier to classify between each one of them.
+
+c.
+Square root scales can be applied to dataset with large values and it can display zero-value.
+Log scale is better for dataset with some outliers in it because it transfers exponential relation to linear one, though it can’t display data with zero or negative values.
