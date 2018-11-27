@@ -1,0 +1,63 @@
+****************************************
+Q3.1
+
+Linear Regression - 
+	Training Accuracy: 0.8607817303469477
+	Testing Accuracy: 0.8239508700102354
+
+SVM -
+	Training Accuracy: 0.9793588054457619
+	Testing Accuracy: 0.9611054247697032
+
+MLP - 
+	Training Accuracy: 0.95344751866491
+	Testing Accuracy: 0.7717502558853634
+
+Random Forest - 
+	Training Accuracy: 0.9995608256477821
+	Testing Accuracy: 0.9641760491299898
+
+****************************************
+Q3.2 - Hyperparameter tuning
+
+Random Forest - 
+	n_estimators values tested (at least 3): 10, 30, 50, 70, 100
+
+	max_depth values tested (at least 3): 2, 4, 6, 8, 10
+		
+	Best combination of parameter values:
+		n_estimators: 70
+		max_depth: 10
+
+	Testing Accuracy before tuning (default parameters): 0.9641760491299898
+	Testing Accuracy after tuning: 0.9635485287659201
+
+
+SVM -
+	Kernels values tested: rbf, linear
+	C values tested (at least 3): 0.001, 0.01, 0.1
+		
+	Best combination of parameter values: 
+		Kernel: rbf
+		C: 0.1
+
+	Testing Accuracy before tuning (default parameters): 0.9611054247697032
+	Testing Accuracy after tuning: 0.9552042160737813
+
+****************************************
+Q3.3
+
+For your SVM's CV run from Q3.2, state the highest mean testing accuracy 
+across the sets of parameter values and its corresponding mean train score and mean fit time. 
+
+SVM's highest mean testing/cross-validated accuracy (best score): 0.9552042160737813
+SVM's mean train score: 0.95744882
+SVM's mean test score: 0.95520422
+SVM's mean fit time: 0.1636538
+
+****************************************
+Q3.4
+
+Best Classifier: SVM
+Why: In this case, SVM has almost the same accuracy with Random Forest Classifier, which are much better than the others. However, the running time of SVM is an advantage compared with Random Forest.
+
